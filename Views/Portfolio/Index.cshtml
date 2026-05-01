@@ -1,0 +1,565 @@
+@model List<PortfolioApp.Models.Project>
+@{
+    ViewData["Title"] = "Work";
+    var featured = Model.Where(p => p.IsFeatured).ToList();
+}
+
+@section Styles {
+<style>
+    /* HERO */
+    .hero {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        padding: 140px 48px 80px;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .hero::before {
+        content: '';
+        position: absolute;
+        top: -20%;
+        right: -10%;
+        width: 600px;
+        height: 600px;
+        background: radial-gradient(circle, rgba(139,92,246,0.12) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .hero::after {
+        content: '';
+        position: absolute;
+        bottom: 10%;
+        left: -5%;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(59,130,246,0.08) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .hero-content { max-width: 1200px; margin: 0 auto; width: 100%; }
+
+    .hero-eyebrow {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 32px;
+        opacity: 0;
+    }
+
+    .hero-eyebrow-line {
+        width: 40px;
+        height: 1px;
+        background: linear-gradient(90deg, #8b5cf6, #3b82f6);
+    }
+
+    .hero-eyebrow span {
+        font-size: 12px;
+        font-weight: 600;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        color: #8b5cf6;
+    }
+
+    .hero-title {
+        font-size: clamp(48px, 7vw, 96px);
+        font-weight: 800;
+        line-height: 1.0;
+        letter-spacing: -0.03em;
+        margin-bottom: 32px;
+        opacity: 0;
+    }
+
+    .hero-title .line { display: block; overflow: hidden; }
+    .hero-title .line-inner { display: block; transform: translateY(100%); }
+
+    .hero-subtitle {
+        font-size: clamp(16px, 2vw, 20px);
+        color: #aaaaaa;
+        max-width: 560px;
+        line-height: 1.7;
+        margin-bottom: 48px;
+        opacity: 0;
+        font-weight: 400;
+    }
+
+    .hero-cta {
+        display: flex;
+        gap: 16px;
+        flex-wrap: wrap;
+        opacity: 0;
+    }
+
+    .hero-scroll {
+        position: absolute;
+        bottom: 48px;
+        left: 48px;
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        opacity: 0;
+    }
+
+    .hero-scroll-line {
+        width: 1px;
+        height: 60px;
+        background: rgba(255,255,255,0.2);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .hero-scroll-line::after {
+        content: '';
+        position: absolute;
+        top: -100%;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(180deg, #8b5cf6, #3b82f6);
+        animation: scrollLine 2s infinite ease-in-out;
+    }
+
+    @@keyframes scrollLine {
+        0% { top: -100%; }
+        100% { top: 100%; }
+    }
+
+    .hero-scroll span {
+        font-size: 11px;
+        letter-spacing: 0.15em;
+        text-transform: uppercase;
+        color: #555;
+        writing-mode: vertical-rl;
+    }
+
+    /* STATS BAR */
+    .stats-bar {
+        padding: 0 48px 100px;
+        max-width: 1200px;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1px;
+        background: rgba(255,255,255,0.05);
+    }
+
+    .stat-item {
+        background: #0b0b0c;
+        padding: 40px;
+        text-align: center;
+    }
+
+    .stat-number {
+        font-size: 48px;
+        font-weight: 800;
+        letter-spacing: -0.03em;
+        background: linear-gradient(135deg, #8b5cf6, #3b82f6);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        display: block;
+        margin-bottom: 8px;
+    }
+
+    .stat-label {
+        font-size: 13px;
+        color: #555;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+    }
+
+    /* PORTFOLIO SECTION */
+    .portfolio-section {
+        padding: 80px 48px 120px;
+    }
+
+    .section-header {
+        max-width: 1200px;
+        margin: 0 auto 64px;
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+    }
+
+    .section-title {
+        font-size: clamp(32px, 4vw, 48px);
+        font-weight: 700;
+        letter-spacing: -0.03em;
+        line-height: 1.1;
+    }
+
+    .portfolio-grid {
+        max-width: 1200px;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 24px;
+    }
+
+    .portfolio-card {
+        position: relative;
+        border-radius: 12px;
+        overflow: hidden;
+        background: #111111;
+        cursor: none;
+        opacity: 0;
+        transform: translateY(40px);
+    }
+
+    .portfolio-card:nth-child(1) { grid-column: span 2; }
+
+    .card-image-wrap {
+        position: relative;
+        overflow: hidden;
+        aspect-ratio: 16/10;
+    }
+
+    .portfolio-card:nth-child(1) .card-image-wrap { aspect-ratio: 16/9; }
+
+    .card-image-wrap img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        display: block;
+    }
+
+    .portfolio-card:hover .card-image-wrap img {
+        transform: scale(1.05);
+    }
+
+    .card-overlay {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, transparent 60%);
+        opacity: 0;
+        transition: opacity 0.4s ease;
+    }
+
+    .portfolio-card:hover .card-overlay { opacity: 1; }
+
+    .card-content {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        padding: 32px;
+        transform: translateY(8px);
+        transition: transform 0.4s ease;
+    }
+
+    .portfolio-card:hover .card-content { transform: translateY(0); }
+
+    .card-category {
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.15em;
+        text-transform: uppercase;
+        color: #8b5cf6;
+        margin-bottom: 8px;
+    }
+
+    .card-title {
+        font-size: 20px;
+        font-weight: 700;
+        color: #ffffff;
+        letter-spacing: -0.01em;
+        line-height: 1.3;
+    }
+
+    .card-arrow {
+        position: absolute;
+        top: 24px;
+        right: 24px;
+        width: 40px;
+        height: 40px;
+        background: rgba(255,255,255,0.1);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        transform: scale(0.8);
+        transition: opacity 0.3s ease, transform 0.3s ease, background 0.3s ease;
+        backdrop-filter: blur(10px);
+    }
+
+    .portfolio-card:hover .card-arrow {
+        opacity: 1;
+        transform: scale(1);
+        background: linear-gradient(135deg, #8b5cf6, #3b82f6);
+    }
+
+    /* COLOR PLACEHOLDER IMAGES */
+    .img-placeholder {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+        color: rgba(255,255,255,0.2);
+        letter-spacing: 0.05em;
+    }
+
+    /* ABOUT TEASER */
+    .about-section {
+        padding: 100px 48px;
+        background: #111111;
+    }
+
+    .about-inner {
+        max-width: 1200px;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 80px;
+        align-items: center;
+    }
+
+    .about-image-wrap {
+        position: relative;
+        aspect-ratio: 4/5;
+        border-radius: 12px;
+        overflow: hidden;
+    }
+
+    .about-image-wrap .img-placeholder {
+        background: linear-gradient(135deg, #161616, #1a1a1f);
+        font-size: 18px;
+    }
+
+    .about-image-accent {
+        position: absolute;
+        bottom: -20px;
+        right: -20px;
+        width: 200px;
+        height: 200px;
+        background: linear-gradient(135deg, rgba(139,92,246,0.3), rgba(59,130,246,0.3));
+        border-radius: 50%;
+        filter: blur(40px);
+        pointer-events: none;
+    }
+
+    .about-text h2 {
+        font-size: clamp(32px, 4vw, 48px);
+        font-weight: 700;
+        letter-spacing: -0.03em;
+        line-height: 1.1;
+        margin-bottom: 24px;
+    }
+
+    .about-text p {
+        font-size: 17px;
+        color: #aaaaaa;
+        line-height: 1.8;
+        margin-bottom: 24px;
+    }
+
+    .skills-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+        margin-top: 32px;
+    }
+
+    .skill-tag {
+        padding: 10px 16px;
+        background: rgba(255,255,255,0.05);
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 8px;
+        font-size: 13px;
+        color: #aaaaaa;
+        letter-spacing: 0.02em;
+    }
+
+    @@media (max-width: 1024px) {
+        .portfolio-grid { grid-template-columns: repeat(2, 1fr); }
+        .portfolio-card:nth-child(1) { grid-column: span 2; }
+    }
+
+    @@media (max-width: 768px) {
+        .hero { padding: 120px 24px 60px; }
+        .stats-bar { padding: 0 24px 80px; grid-template-columns: 1fr; }
+        .portfolio-section { padding: 60px 24px 80px; }
+        .portfolio-grid { grid-template-columns: 1fr; gap: 16px; }
+        .portfolio-card:nth-child(1) { grid-column: span 1; }
+        .section-header { flex-direction: column; align-items: flex-start; gap: 16px; }
+        .about-section { padding: 80px 24px; }
+        .about-inner { grid-template-columns: 1fr; gap: 40px; }
+        .hero-scroll { display: none; }
+    }
+</style>
+}
+
+<!-- HERO SECTION -->
+<section class="hero" id="hero">
+    <div class="hero-content">
+        <div class="hero-eyebrow animate-el">
+            <span class="hero-eyebrow-line"></span>
+            <span>Graphic Designer & UI Specialist</span>
+        </div>
+
+        <h1 class="hero-title animate-el">
+            <span class="line"><span class="line-inner">Crafting Brands</span></span>
+            <span class="line"><span class="line-inner">That <span class="gradient-text">Command</span></span></span>
+            <span class="line"><span class="line-inner">Attention.</span></span>
+        </h1>
+
+        <p class="hero-subtitle animate-el">
+            I design premium brand identities, digital products, and editorial experiences 
+            that turn first impressions into lasting relationships.
+        </p>
+
+        <div class="hero-cta animate-el">
+            <a href="#work" class="btn-primary">
+                View Work
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                    <path d="M3 8H13M13 8L9 4M13 8L9 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                </svg>
+            </a>
+            <a href="/Contact" class="btn-secondary">Start a Project</a>
+        </div>
+    </div>
+
+    <div class="hero-scroll animate-el">
+        <div class="hero-scroll-line"></div>
+        <span>Scroll</span>
+    </div>
+</section>
+
+<!-- STATS BAR -->
+<div class="stats-bar" id="about">
+    <div class="stat-item animate-el">
+        <span class="stat-number">6+</span>
+        <span class="stat-label">Years Experience</span>
+    </div>
+    <div class="stat-item animate-el">
+        <span class="stat-number">80+</span>
+        <span class="stat-label">Projects Delivered</span>
+    </div>
+    <div class="stat-item animate-el">
+        <span class="stat-number">95%</span>
+        <span class="stat-label">Client Satisfaction</span>
+    </div>
+</div>
+
+<!-- PORTFOLIO GRID -->
+<section class="portfolio-section" id="work">
+    <div class="section-header animate-el">
+        <div>
+            <span class="section-label">Selected Work</span>
+            <h2 class="section-title">Recent Projects</h2>
+        </div>
+        <p style="font-size:14px; color:#555; max-width:240px; text-align:right; line-height:1.6;">
+            A curated selection of brand, digital, and editorial work.
+        </p>
+    </div>
+
+    <div class="portfolio-grid">
+        @foreach (var project in Model)
+        {
+            <a href="/Portfolio/Details/@project.Slug" class="portfolio-card" data-cursor>
+                <div class="card-image-wrap">
+                    <div class="img-placeholder" style="background: linear-gradient(135deg, @GetCardGradient(project.Id));">
+                        <span style="writing-mode:vertical-rl; letter-spacing:0.2em; opacity:0.3;">@project.Category.ToUpper()</span>
+                    </div>
+                </div>
+                <div class="card-overlay"></div>
+                <div class="card-content">
+                    <p class="card-category">@project.Category</p>
+                    <h3 class="card-title">@project.Title</h3>
+                </div>
+                <div class="card-arrow">
+                    <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+                        <path d="M3 13L13 3M13 3H5M13 3V11" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+                    </svg>
+                </div>
+            </a>
+        }
+    </div>
+</section>
+
+<!-- ABOUT TEASER -->
+<section class="about-section">
+    <div class="about-inner">
+        <div class="about-image-wrap animate-el">
+            <div class="img-placeholder" style="background: linear-gradient(160deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);">
+                <span style="opacity:0.4; font-size:13px; letter-spacing:0.15em;">ALEX RIVERA</span>
+            </div>
+            <div class="about-image-accent"></div>
+        </div>
+        <div class="about-text">
+            <span class="section-label">About</span>
+            <h2 class="animate-el">Design is how I <span class="gradient-text">think</span>, not just what I make.</h2>
+            <p class="animate-el">I'm Alex Rivera, a senior graphic designer with 6+ years of experience helping startups, agencies, and enterprise brands build compelling visual identities.</p>
+            <p class="animate-el">My work sits at the intersection of strategy and aesthetics — every pixel serves a purpose, and every design decision is rooted in a deeper understanding of the user and the brand.</p>
+            <div class="skills-grid animate-el">
+                <span class="skill-tag">Brand Identity</span>
+                <span class="skill-tag">UI/UX Design</span>
+                <span class="skill-tag">Editorial Design</span>
+                <span class="skill-tag">Packaging Design</span>
+                <span class="skill-tag">Motion Design</span>
+                <span class="skill-tag">Art Direction</span>
+            </div>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+<script>
+    gsap.registerPlugin(ScrollTrigger);
+
+    gsap.timeline({ delay: 0.8 })
+        .to('.hero-eyebrow', { opacity: 1, y: 0, duration: 0.6, ease: 'power3.out', from: { y: 20 } })
+        .to('.hero-title .line-inner', { y: '0%', duration: 0.8, stagger: 0.1, ease: 'power3.out' }, '-=0.3')
+        .to('.hero-title', { opacity: 1, duration: 0.01 }, '<')
+        .to('.hero-subtitle', { opacity: 1, y: 0, duration: 0.6, ease: 'power3.out', from: { y: 20 } }, '-=0.4')
+        .to('.hero-cta', { opacity: 1, y: 0, duration: 0.6, ease: 'power3.out', from: { y: 20 } }, '-=0.3')
+        .to('.hero-scroll', { opacity: 1, duration: 0.6, ease: 'power3.out' }, '-=0.3');
+
+    gsap.from('.stat-item', {
+        scrollTrigger: { trigger: '.stats-bar', start: 'top 80%' },
+        opacity: 0, y: 30, duration: 0.6, stagger: 0.1, ease: 'power3.out'
+    });
+
+    gsap.from('.section-header', {
+        scrollTrigger: { trigger: '.portfolio-section', start: 'top 80%' },
+        opacity: 0, y: 30, duration: 0.7, ease: 'power3.out'
+    });
+
+    gsap.to('.portfolio-card', {
+        scrollTrigger: { trigger: '.portfolio-grid', start: 'top 80%' },
+        opacity: 1, y: 0, duration: 0.7, stagger: 0.12, ease: 'power3.out'
+    });
+
+    gsap.from('.about-image-wrap', {
+        scrollTrigger: { trigger: '.about-section', start: 'top 75%' },
+        opacity: 0, x: -40, duration: 0.8, ease: 'power3.out'
+    });
+
+    gsap.from('.about-text .animate-el', {
+        scrollTrigger: { trigger: '.about-section', start: 'top 75%' },
+        opacity: 0, y: 30, duration: 0.6, stagger: 0.12, ease: 'power3.out'
+    });
+
+    if (window.innerWidth < 768) {
+        gsap.globalTimeline.timeScale(2);
+    }
+</script>
+}
+
+@functions {
+    string GetCardGradient(int id) {
+        return id switch {
+            1 => "#1a0533 0%, #0d1b4e 100%",
+            2 => "#051a1a 0%, #0a3d3d 100%",
+            3 => "#1a0518 0%, #3d0525 100%",
+            4 => "#0a1a30 0%, #0a2a50 100%",
+            5 => "#0f1a0f 0%, #1a3320 100%",
+            6 => "#1a1500 0%, #332a00 100%",
+            _ => "#111111 0%, #222222 100%"
+        };
+    }
+}
