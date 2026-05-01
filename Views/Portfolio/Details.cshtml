@@ -1,0 +1,352 @@
+@model PortfolioApp.Models.Project
+@{
+    ViewData["Title"] = Model.Title;
+}
+
+@section Styles {
+<style>
+    .detail-hero {
+        height: 85vh;
+        position: relative;
+        overflow: hidden;
+        display: flex;
+        align-items: flex-end;
+        padding: 80px 48px;
+    }
+
+    .detail-hero-bg {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .detail-hero-overlay {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(to top, rgba(11,11,12,1) 0%, rgba(11,11,12,0.4) 60%, transparent 100%);
+    }
+
+    .detail-hero-content {
+        position: relative;
+        z-index: 10;
+        max-width: 1200px;
+        margin: 0 auto;
+        width: 100%;
+    }
+
+    .detail-hero h1 {
+        font-size: clamp(40px, 6vw, 80px);
+        font-weight: 800;
+        letter-spacing: -0.03em;
+        line-height: 1.0;
+        margin-bottom: 24px;
+        opacity: 0;
+        transform: translateY(30px);
+    }
+
+    .detail-meta {
+        display: flex;
+        gap: 40px;
+        flex-wrap: wrap;
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    .meta-item {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .meta-label {
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.15em;
+        text-transform: uppercase;
+        color: #8b5cf6;
+    }
+
+    .meta-value {
+        font-size: 15px;
+        color: #aaaaaa;
+    }
+
+    .detail-content {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 80px 48px 120px;
+    }
+
+    .detail-intro {
+        font-size: clamp(20px, 2.5vw, 28px);
+        font-weight: 400;
+        line-height: 1.6;
+        color: #ffffff;
+        margin-bottom: 80px;
+        opacity: 0;
+    }
+
+    .detail-section {
+        margin-bottom: 64px;
+        opacity: 0;
+        transform: translateY(24px);
+    }
+
+    .detail-section h3 {
+        font-size: 12px;
+        font-weight: 600;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        color: #8b5cf6;
+        margin-bottom: 16px;
+    }
+
+    .detail-section p {
+        font-size: 17px;
+        line-height: 1.85;
+        color: #aaaaaa;
+    }
+
+    .detail-gallery {
+        padding: 0 48px 120px;
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+    .gallery-label {
+        font-size: 12px;
+        font-weight: 600;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        color: #8b5cf6;
+        margin-bottom: 32px;
+        display: block;
+    }
+
+    .gallery-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
+    }
+
+    .gallery-item {
+        border-radius: 12px;
+        overflow: hidden;
+        aspect-ratio: 4/3;
+        opacity: 0;
+        transform: translateY(30px);
+    }
+
+    .gallery-item:first-child {
+        grid-column: span 2;
+        aspect-ratio: 16/7;
+    }
+
+    .gallery-item .img-placeholder {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 13px;
+        color: rgba(255,255,255,0.15);
+        letter-spacing: 0.1em;
+    }
+
+    .detail-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 40px;
+    }
+
+    .tag {
+        padding: 6px 14px;
+        background: rgba(139,92,246,0.1);
+        border: 1px solid rgba(139,92,246,0.2);
+        border-radius: 40px;
+        font-size: 12px;
+        color: #8b5cf6;
+        letter-spacing: 0.05em;
+    }
+
+    .next-project {
+        padding: 80px 48px;
+        border-top: 1px solid rgba(255,255,255,0.05);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+    .next-project-link {
+        font-size: clamp(28px, 4vw, 48px);
+        font-weight: 700;
+        letter-spacing: -0.02em;
+        color: #ffffff;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 24px;
+        transition: gap 0.3s ease;
+    }
+
+    .next-project-link:hover { gap: 32px; }
+
+    .next-project-arrow {
+        width: 56px;
+        height: 56px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #8b5cf6, #3b82f6);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    @@media (max-width: 768px) {
+        .detail-hero { padding: 80px 24px; height: 70vh; }
+        .detail-content { padding: 60px 24px 80px; }
+        .detail-gallery { padding: 0 24px 80px; }
+        .gallery-grid { grid-template-columns: 1fr; }
+        .gallery-item:first-child { grid-column: span 1; aspect-ratio: 4/3; }
+        .next-project { padding: 60px 24px; flex-direction: column; align-items: flex-start; gap: 24px; }
+    }
+</style>
+}
+
+<!-- HERO -->
+<section class="detail-hero">
+    <div class="detail-hero-bg">
+        <div class="img-placeholder" style="width:100%; height:100%; background: linear-gradient(135deg, #0d0d1a 0%, #1a0d2e 50%, #0d1a1a 100%);">
+        </div>
+    </div>
+    <div class="detail-hero-overlay"></div>
+    <div class="detail-hero-content">
+        <h1>@Model.Title</h1>
+        <div class="detail-meta">
+            <div class="meta-item">
+                <span class="meta-label">Category</span>
+                <span class="meta-value">@Model.Category</span>
+            </div>
+            <div class="meta-item">
+                <span class="meta-label">Client</span>
+                <span class="meta-value">@(string.IsNullOrEmpty(Model.ClientName) ? "Confidential" : Model.ClientName)</span>
+            </div>
+            <div class="meta-item">
+                <span class="meta-label">Year</span>
+                <span class="meta-value">@(string.IsNullOrEmpty(Model.ProjectYear) ? Model.CreatedDate.Year.ToString() : Model.ProjectYear)</span>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CONTENT -->
+<div class="detail-content">
+    <p class="detail-intro">@Model.ShortDescription</p>
+
+    @if (!string.IsNullOrEmpty(Model.Problem))
+    {
+        <div class="detail-section">
+            <h3>The Problem</h3>
+            <p>@Model.Problem</p>
+        </div>
+    }
+
+    @if (!string.IsNullOrEmpty(Model.Approach))
+    {
+        <div class="detail-section">
+            <h3>Our Approach</h3>
+            <p>@Model.Approach</p>
+        </div>
+    }
+
+    @if (!string.IsNullOrEmpty(Model.Solution))
+    {
+        <div class="detail-section">
+            <h3>The Solution</h3>
+            <p>@Model.Solution</p>
+        </div>
+    }
+
+    @if (Model.Tags?.Any() == true)
+    {
+        <div class="detail-tags">
+            @foreach (var tag in Model.Tags)
+            {
+                <span class="tag">@tag</span>
+            }
+        </div>
+    }
+</div>
+
+<!-- GALLERY -->
+<div class="detail-gallery">
+    <span class="gallery-label">Project Gallery</span>
+    <div class="gallery-grid">
+        @{
+            var galleryGradients = new[] {
+                "linear-gradient(135deg, #0d0d1a, #1a0d2e)",
+                "linear-gradient(135deg, #0d1a1a, #0a3d3d)",
+                "linear-gradient(135deg, #1a0518, #3d0525)"
+            };
+        }
+        @for (int i = 0; i < 3; i++)
+        {
+            <div class="gallery-item">
+                <div class="img-placeholder" style="background: @galleryGradients[i % galleryGradients.Length];">
+                    <span>@Model.Title — @(i + 1)</span>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<!-- BACK TO WORK -->
+<div style="max-width:1200px; margin:0 auto; padding: 0 48px 40px;">
+    <a href="/" class="btn-secondary" style="display:inline-flex;">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <path d="M13 8H3M3 8L7 4M3 8L7 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+        Back to Work
+    </a>
+</div>
+
+@section Scripts {
+<script>
+    gsap.registerPlugin(ScrollTrigger);
+
+    gsap.timeline({ delay: 0.5 })
+        .to('.detail-hero h1', { opacity: 1, y: 0, duration: 0.8, ease: 'power3.out' })
+        .to('.detail-meta', { opacity: 1, y: 0, duration: 0.6, ease: 'power3.out' }, '-=0.4');
+
+    gsap.to('.detail-intro', {
+        scrollTrigger: { trigger: '.detail-intro', start: 'top 80%' },
+        opacity: 1, y: 0, duration: 0.8, ease: 'power3.out'
+    });
+
+    gsap.to('.detail-section', {
+        scrollTrigger: { trigger: '.detail-content', start: 'top 70%' },
+        opacity: 1, y: 0, duration: 0.7, stagger: 0.15, ease: 'power3.out'
+    });
+
+    gsap.to('.gallery-item', {
+        scrollTrigger: { trigger: '.gallery-grid', start: 'top 80%' },
+        opacity: 1, y: 0, duration: 0.7, stagger: 0.12, ease: 'power3.out'
+    });
+
+    gsap.to('.detail-hero-bg', {
+        scrollTrigger: {
+            trigger: '.detail-hero',
+            start: 'top top',
+            end: 'bottom top',
+            scrub: 1
+        },
+        y: '30%',
+        ease: 'none'
+    });
+</script>
+}
